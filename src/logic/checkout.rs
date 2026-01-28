@@ -1,35 +1,41 @@
+use std::fs;
 use crate::storage::{
-    head::{read_head, write_head},
     commit::load_commit,
+    head::write_head_branch,
 };
 
-pub fn checkout(commit_number: usize) {
-    let current_head = match read_head() {
-        Ok(h) => h,
-        Err(_) => {
-            println!("Repository not initialized.");
-            return;
-        }
-    };
-
+pub fn checkout_commit(commit_number: usize) {
     if commit_number == 0 {
         println!("Invalid commit number.");
         return;
     }
 
-    // Load commit once
-    let _commit = match load_commit(commit_number) {
-        Ok(c) => c,
-        Err(_) => {
-            println!("Commit {} does not exist.", commit_number);
-            return;
-        }
-    };
-
-    if let Err(_) = write_head(commit_number) {
-        println!("Failed to update HEAD.");
+    if load_commit(commit_number).is_err() {
+        println!("Commit {} does not exist.", commit_number);
         return;
     }
 
-    println!("Switched from commit {} to commit {}", current_head,commit_number);
+    // Detached HEAD mode
+    if fs::write(".cotask/HEAD", commit_number.to_string()).is_err() {
+        println!("Failed to detach HEAD.");
+        return;
+    }
+
+    println!("HEAD detached at commit {}", commit_number);
+}
+
+pub fn checkout_branch(name: &str) {
+    let path = format!(".cotask/refs/{}", name);
+
+    if fs::metadata(&path).is_err() {
+        println!("Branch '{}' does not exist.", name);
+        return;
+    }
+
+    if write_head_branch(name).is_err() {
+        println!("Failed to switch branch.");
+        return;
+    }
+
+    println!("Switched to branch '{}'", name);
 }

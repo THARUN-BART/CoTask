@@ -2,7 +2,7 @@ use std::collections::HashSet;
 use std::fs;
 
 use crate::storage::{
-    head::read_head,
+    head::{read_head_branch, read_branch_commit},
     commit::load_commit,
 };
 
@@ -12,7 +12,7 @@ fn collect_reachable(commit_number: usize, reachable: &mut HashSet<usize>) {
         return;
     }
 
-    // Try loading commit
+    // Load commit
     if let Ok(commit) = load_commit(commit_number) {
         reachable.insert(commit_number);
 
@@ -22,25 +22,31 @@ fn collect_reachable(commit_number: usize, reachable: &mut HashSet<usize>) {
         }
     }
 }
+
 pub fn run_gc() {
-    let head = match read_head() {
-        Ok(h) => h,
+    // 1️⃣ Read current branch
+    let branch = match read_head_branch() {
+        Ok(b) => b,
         Err(_) => {
             println!("Repository not initialized.");
             return;
         }
     };
 
-    if head == 0 {
-        println!("No commits to clean.");
-        return;
-    }
+    // 2️⃣ Read commit pointed by branch
+    let head_commit = match read_branch_commit(&branch) {
+        Ok(c) => c,
+        Err(_) => {
+            println!("Branch commit not found.");
+            return;
+        }
+    };
 
-    // Step 1: Find reachable commits
+    // 3️⃣ Mark reachable commits
     let mut reachable = HashSet::new();
-    collect_reachable(head, &mut reachable);
+    collect_reachable(head_commit, &mut reachable);
 
-    // Step 2: Read all commit files
+    // 4️⃣ Sweep unreachable commits
     let paths = match fs::read_dir(".cotask/commits") {
         Ok(p) => p,
         Err(_) => {

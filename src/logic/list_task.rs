@@ -1,23 +1,29 @@
 use crate::storage::{
-    head::read_head,
+    head::{read_head_branch, read_branch_commit},
     commit::load_commit,
 };
 
 pub fn list_tasks() {
-    let head = match read_head() {
-        Ok(h) => h,
+    // 1️⃣ Get current branch
+    let branch = match read_head_branch() {
+        Ok(b) => b,
         Err(_) => {
             println!("Repository not initialized.");
             return;
         }
     };
 
-    if head == 0 {
-        println!("No tasks yet.");
-        return;
-    }
+    // 2️⃣ Get commit number of branch
+    let commit_number = match read_branch_commit(&branch) {
+        Ok(c) => c,
+        Err(_) => {
+            println!("No tasks yet.");
+            return;
+        }
+    };
 
-    let commit = match load_commit(head) {
+    // 3️⃣ Load commit
+    let commit = match load_commit(commit_number) {
         Ok(c) => c,
         Err(_) => {
             println!("Failed to load latest commit.");

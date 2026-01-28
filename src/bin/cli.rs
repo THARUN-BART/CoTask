@@ -1,5 +1,5 @@
 use std::env;
-use cotask::logic::{checkout, gc, init_repo, list_task, revert, show_log, task,merge};
+use cotask::logic::{checkout, gc, init_repo, list_task, revert, show_log, add_task,merge,branch};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -19,7 +19,7 @@ fn main() {
                 println!("Please provide task text.");
                 return;
             }
-            task::add_task(&args[2]);
+            add_task::add_task(&args[2]);
         }
 
         "list" => list_task::list_tasks(),
@@ -37,7 +37,7 @@ fn main() {
                 }
                 
             };
-            task::mark_done(id);
+            add_task::mark_done(id);
 
             let id: usize = args[2].parse().expect("Invalid task ID");
         }
@@ -46,13 +46,22 @@ fn main() {
 
         "checkout" => {
             if args.len() < 3 {
-                println!("Provide commit number.");
+                println!("Provide branch name or commit number.");
                 return;
             }
 
-            let num: usize = args[2].parse().expect("Invalid number");
-            checkout::checkout(num);
+            let input = &args[2];
+
+    
+            if let Ok(num) = input.parse::<usize>() {
+                checkout::checkout_commit(num);
+            } 
+    
+            else {
+                checkout::checkout_branch(input);
+            }
         }
+
 
         "revert" => {
             if args.len() < 3 {
@@ -81,6 +90,19 @@ fn main() {
 
             merge::merge(num);
         }
+
+        "branch" => {
+            if args.len() < 3 {
+                println!("Provide branch name.");
+                return;
+            }
+            branch::create_branch(&args[2]);
+        }
+
+        "branches" => {
+            branch::list_branches();
+        }
+
 
 
 
