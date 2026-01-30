@@ -116,7 +116,7 @@
 ### Quick Install
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/BartSimpson2911/CoTask
 cd CoTask
 chmod +x x.sh
 ./x.sh
