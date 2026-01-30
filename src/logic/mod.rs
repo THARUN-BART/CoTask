@@ -8,3 +8,7 @@ pub mod revert;
 pub mod gc;
 pub mod merge;
 pub mod branch;
+pub mod diff;
+pub mod show_help;
+pub mod resolve;
+pub mod rebase;

@@ -6,7 +6,6 @@ use crate::storage::{
 };
 
 pub fn show_log() {
-    // 1️⃣ Read current branch
     let branch = match read_head_branch() {
         Ok(b) => b,
         Err(_) => {
@@ -15,7 +14,6 @@ pub fn show_log() {
         }
     };
 
-    // 2️⃣ Read commit number the branch points to
     let head_commit = match read_branch_commit(&branch) {
         Ok(c) => c,
         Err(_) => {
@@ -26,7 +24,6 @@ pub fn show_log() {
 
     println!("Commit History (branch: {}):\n", branch);
 
-    // 3️⃣ Traverse commit DAG from HEAD
     let mut stack = vec![head_commit];
     let mut visited = HashSet::new();
 
@@ -39,6 +36,7 @@ pub fn show_log() {
         match load_commit(commit_number) {
             Ok(commit) => {
                 println!("Commit {}", commit_number);
+                println!("Message: {}", commit.message); 
 
                 for task in &commit.tasks {
                     let status = if task.completed { "✓" } else { " " };
@@ -47,7 +45,6 @@ pub fn show_log() {
 
                 println!("----------------------");
 
-                // Add parents to stack (DAG traversal)
                 for parent in commit.parents {
                     stack.push(parent);
                 }

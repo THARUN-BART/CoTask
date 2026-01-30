@@ -1,7 +1,7 @@
 use std::fs;
 use crate::storage::{
     commit::load_commit,
-    head::write_head_branch,
+    head::{write_head_branch,read_head_branch}
 };
 
 pub fn checkout_commit(commit_number: usize) {
@@ -30,6 +30,13 @@ pub fn checkout_branch(name: &str) {
     if fs::metadata(&path).is_err() {
         println!("Branch '{}' does not exist.", name);
         return;
+    }
+
+    if let Ok(current) = read_head_branch() {
+        if current == name {
+            println!("Already on branch '{}'", name);
+            return;
+        }
     }
 
     if write_head_branch(name).is_err() {

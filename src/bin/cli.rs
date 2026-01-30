@@ -1,5 +1,5 @@
 use std::env;
-use cotask::logic::{checkout, gc, init_repo, list_task, revert, show_log, add_task,merge,branch};
+use cotask::logic::{add_task, branch, checkout, diff, gc, init_repo, list_task, merge, revert, show_help, show_log,resolve, rebase};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -39,7 +39,6 @@ fn main() {
             };
             add_task::mark_done(id);
 
-            let id: usize = args[2].parse().expect("Invalid task ID");
         }
         
         "log" => show_log::show_log(),
@@ -62,6 +61,15 @@ fn main() {
             }
         }
 
+        "branch-delete" => {
+            if args.len() < 3 {
+                println!("Provide branch name to delete.");
+                return;
+            }
+            branch::delete_branch(&args[2]);
+        }
+
+
 
         "revert" => {
             if args.len() < 3 {
@@ -76,20 +84,14 @@ fn main() {
         "gc" => gc::run_gc(),
 
         "merge" => {
-            if(args.len()<3){
-                 println!("Provide commit number to merge.");
+            if args.len() < 3 {
+                println!("Provide branch name to merge.");
                 return;
             }
-            let num: usize = match args[2].parse() {
-            Ok(n) => n,
-            Err(_) => {
-                println!("Invalid commit number.");
-                return;
-            }
-            };
 
-            merge::merge(num);
+            merge::merge_branch(&args[2]);
         }
+
 
         "branch" => {
             if args.len() < 3 {
@@ -103,10 +105,53 @@ fn main() {
             branch::list_branches();
         }
 
+        "diff" => {
+            if args.len() < 4 {
+                println!("Usage: diff <commit1> <commit2>");
+                return;
+            }
 
+            let c1 = args[2].parse().unwrap_or(0);
+            let c2 = args[3].parse().unwrap_or(0);
 
+            diff::diff(c1, c2);
+        }
+        "--help" => {
+            show_help::show_help();
+            return;
+        }
 
+        "resolve" => {
+            if args.len() < 4 {
+                println!("Usage: resolve <task_id> done|undone");
+                return;
+            }
 
-        _ => println!("Unknown command"),
+            let id: usize = args[2].parse().unwrap_or(0);
+            let done = match args[3].as_str() {
+                "done" => true,
+                "undone" => false,
+                _ => {
+                    println!("Use 'done' or 'undone'");
+                    return;
+                }
+            };
+
+            resolve::resolve(id, done);
+        }
+        "rebase" => {
+        if args.len() < 3 {
+            println!("Provide target branch.");
+            return;
+        }
+
+        rebase::rebase_onto(&args[2]);
+    }
+
+        _ => {
+            println!("Unknown command.\n");
+            show_help::show_help();  
+        }
+
     }
 }

@@ -1,14 +1,14 @@
+use std::fs;
 use std::collections::HashMap;
 use crate::storage::{
     head::{read_head_branch, read_branch_commit, write_branch_commit},
     commit::{load_commit, save_commit},
 };
-use crate::models::commit_model::Commit;
-use crate::models::task_model::Task;
+use crate::models::{commit_model::Commit, task_model::Task};
 
-pub fn merge(target_commit: usize) {
-    // 1️⃣ Get current branch
-    let branch = match read_head_branch() {
+pub fn merge_branch(target_branch: &str) {
+    // Current branch (OURS)
+    let current_branch = match read_head_branch() {
         Ok(b) => b,
         Err(_) => {
             println!("Repository not initialized.");
@@ -16,74 +16,75 @@ pub fn merge(target_commit: usize) {
         }
     };
 
-    // 2️⃣ Get current commit of branch (OURS)
-    let head_commit = match read_branch_commit(&branch) {
-        Ok(c) => c,
-        Err(_) => {
-            println!("Failed to read branch commit.");
-            return;
-        }
-    };
-
-    // 3️⃣ Load commits
-    let current = match load_commit(head_commit) {
-        Ok(c) => c,
-        Err(_) => {
-            println!("Failed to load current commit.");
-            return;
-        }
-    };
-
-    let target = match load_commit(target_commit) {
-        Ok(c) => c,
-        Err(_) => {
-            println!("Target commit does not exist.");
-            return;
-        }
-    };
-
-    // 4️⃣ Merge tasks
-    let mut task_map: HashMap<usize, Task> = HashMap::new();
-
-    for task in current.tasks {
-        task_map.insert(task.id, task);
+    if current_branch == target_branch {
+        println!("Cannot merge a branch into itself.");
+        return;
     }
 
-    for task in target.tasks {
+    // Commit numbers
+    let ours = match read_branch_commit(&current_branch) {
+        Ok(c) => c,
+        Err(_) => {
+            println!("Failed to read current branch commit.");
+            return;
+        }
+    };
+
+    let theirs = match read_branch_commit(target_branch) {
+        Ok(c) => c,
+        Err(_) => {
+            println!("Target branch '{}' does not exist.", target_branch);
+            return;
+        }
+    };
+
+    // Load commits
+    let current = load_commit(ours).unwrap();
+    let target = load_commit(theirs).unwrap();
+
+    let mut task_map: HashMap<usize, Task> = HashMap::new();
+
+    for t in current.tasks {
+        task_map.insert(t.id, t);
+    }
+
+    for t in target.tasks {
         task_map
-            .entry(task.id)
-            .and_modify(|t| {
-                t.completed = t.completed || task.completed;
+            .entry(t.id)
+            .and_modify(|existing| {
+                // Conflict detection
+                if existing.completed != t.completed || existing.text != t.text {
+                    let conflict_info = format!(
+                        "TASK {}\nOURS: completed={}, text={}\nTHEIRS: completed={}, text={}\n",
+                        existing.id, existing.completed, existing.text,
+                        t.completed, t.text
+                    );
+                    fs::write(".cotask/MERGE_CONFLICT", conflict_info).unwrap();
+
+                    println!("⚠ Conflict in task {}!", existing.id);
+                    println!("Run: cotask resolve {} done|undone", existing.id);
+                    return; // stop merge safely
+                }
             })
-            .or_insert(task);
+            .or_insert(t);
     }
 
     let merged_tasks: Vec<Task> = task_map.into_values().collect();
 
-    // 5️⃣ Create merge commit
-    let new_commit_number = head_commit + 1;
-    let message = format!("Merged commit {}", target_commit);
+    let new_commit_number = ours + 1;
+    let message = format!("Merged branch '{}'", target_branch);
 
     let new_commit = Commit {
-        parents: vec![head_commit, target_commit],
+        parents: vec![ours, theirs],
         message,
         tasks: merged_tasks,
     };
 
-    // 6️⃣ Save commit
-    if save_commit(new_commit_number, &new_commit).is_err() {
-        println!("Failed to save merged commit.");
-        return;
-    }
-
-    // 7️⃣ Move branch pointer
-    if write_branch_commit(&branch, new_commit_number).is_err() {
-        println!("Failed to update branch pointer.");
-        return;
-    }
+    save_commit(new_commit_number, &new_commit).unwrap();
+    write_branch_commit(&current_branch, new_commit_number).unwrap();
 
     println!(
-        "Merged commit {} into branch '{}' → new commit {}",
-        target_commit, branch, new_commit_number
+        "Merged branch '{}' into '{}' → commit {}",
+        target_branch, current_branch, new_commit_number
     );
 }

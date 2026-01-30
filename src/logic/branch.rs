@@ -54,3 +54,34 @@ pub fn list_branches() {
         }
     }
 }
+
+pub fn delete_branch(name: &str) {
+    let current_branch = match read_head_branch() {
+        Ok(b) => b,
+        Err(_) => {
+            println!("Repository not initialized.");
+            return;
+        }
+
+    };
+    // Prevent deleting current branch
+    if name == current_branch {
+        println!("Cannot delete the current branch '{}'.", name);
+        return;
+    }
+
+    let path = format!(".cotask/refs/{}",name);
+    // Check branch exists
+    if fs::metadata(&path).is_err() {
+        println!("Branch '{}' does not exist.", name);
+        return;
+    }
+
+    // Delete branch ref
+    if fs::remove_file(&path).is_err() {
+        println!("Failed to delete branch '{}'.", name);
+        return;
+    }
+
+    println!("Branch '{}' deleted.",name);
+}
