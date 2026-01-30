@@ -12,3 +12,7 @@ pub mod diff;
 pub mod show_help;
 pub mod resolve;
 pub mod rebase;
+pub mod tag;
+pub mod stash;
+pub mod export;
+pub mod import;

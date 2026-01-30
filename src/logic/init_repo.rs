@@ -19,6 +19,15 @@ pub fn init_repo() {
     fs::create_dir(repo_path.join("refs"))
         .expect("Failed to create refs directory");
 
+    // Create tags folder
+    fs::create_dir(repo_path.join("tags"))
+        .expect("Failed to create tags directory");
+
+    // Create stash folder
+    fs::create_dir(repo_path.join("stash"))
+    .expect("Failed to create stash directory");
+
+
     // HEAD now stores branch name
     fs::write(repo_path.join("HEAD"), "main")
         .expect("Failed to create HEAD");

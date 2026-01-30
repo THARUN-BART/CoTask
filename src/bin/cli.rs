@@ -1,5 +1,5 @@
 use std::env;
-use cotask::logic::{add_task, branch, checkout, diff, gc, init_repo, list_task, merge, revert, show_help, show_log,resolve, rebase};
+use cotask::logic::{add_task, branch, checkout, diff, gc, init_repo,import,export,list_task, merge, revert, show_help, show_log,resolve, rebase,stash,tag};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -23,6 +23,15 @@ fn main() {
         }
 
         "list" => list_task::list_tasks(),
+        "export" => export::export_repo(),
+
+        "import" => {
+            if args.len() < 3 {
+                println!("Provide backup file.");
+                return;
+            }
+            import::import_repo(&args[2]);
+        }
 
         "done" => {
             if args.len() < 3 {
@@ -45,19 +54,16 @@ fn main() {
 
         "checkout" => {
             if args.len() < 3 {
-                println!("Provide branch name or commit number.");
+                println!("Provide branch, tag, or commit number.");
                 return;
             }
 
             let input = &args[2];
 
-    
             if let Ok(num) = input.parse::<usize>() {
                 checkout::checkout_commit(num);
-            } 
-    
-            else {
-                checkout::checkout_branch(input);
+            } else {
+                checkout::checkout_ref(input);
             }
         }
 
@@ -69,7 +75,8 @@ fn main() {
             branch::delete_branch(&args[2]);
         }
 
-
+        "stash" => stash::stash(),
+        "stash-pop" => stash::stash_pop(),
 
         "revert" => {
             if args.len() < 3 {
@@ -120,6 +127,19 @@ fn main() {
             show_help::show_help();
             return;
         }
+
+        "tag" => {
+            if args.len() < 3 {
+                println!("Provide tag name.");
+                return;
+            }
+            tag::create_tag(&args[2]);
+        }
+
+        "tags" => {
+            tag::list_tags();
+        }
+
 
         "resolve" => {
             if args.len() < 4 {
