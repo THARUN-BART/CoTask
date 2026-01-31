@@ -1,9 +1,6 @@
 <div align="center">
 
 # 🧠 cotask — Versioned Task Manager
- <div style="background-color:white; display:inline-block; padding:15px; border-radius:12px;"> <img src="https://www.rust-lang.org/static/images/rust-logo-blk.svg" alt="Rust" width="100"/> </div>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
 ### A Git-like task manager built in Rust with full version control mechanics
 
 [![Rust](https://img.shields.io/badge/rust-%23000000.svg?style=for-the-badge&logo=rust&logoColor=white)](https://www.rust-lang.org/)
