@@ -1,7 +1,7 @@
 use crate::models::{commit_model::Commit, task_model::Task};
 use crate::storage::{
     commit::{load_commit, save_commit},
-    head::{read_head_branch, read_branch_commit, write_branch_commit},
+    head::{read_branch_commit, read_head_branch, write_branch_commit},
 };
 
 pub fn add_task(text: &str) {
@@ -41,7 +41,11 @@ pub fn add_task(text: &str) {
     let message = format!("Added task '{}'", text);
 
     let new_commit = Commit {
-        parents: if head_commit == 0 { vec![] } else { vec![head_commit] },
+        parents: if head_commit == 0 {
+            vec![]
+        } else {
+            vec![head_commit]
+        },
         message,
         tasks,
     };

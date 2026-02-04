@@ -1,6 +1,6 @@
+use crate::models::commit_model::Commit;
 use std::fs;
 use std::io;
-use crate::models::commit_model::Commit;
 
 pub fn save_commit(commit_number: usize, commit: &Commit) -> io::Result<()> {
     let path = format!(".cotask/commits/{}.json", commit_number);

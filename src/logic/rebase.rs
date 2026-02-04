@@ -1,8 +1,8 @@
-use crate::storage::{
-    head::{read_head_branch, read_branch_commit, write_branch_commit},
-    commit::{load_commit, save_commit},
-};
 use crate::models::commit_model::Commit;
+use crate::storage::{
+    commit::{load_commit, save_commit},
+    head::{read_branch_commit, read_head_branch, write_branch_commit},
+};
 
 pub fn rebase_onto(target_branch: &str) {
     let current_branch = read_head_branch().unwrap();

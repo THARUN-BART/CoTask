@@ -1,5 +1,8 @@
+use cotask::logic::{
+    add_task, branch, checkout, diff, export, gc, import, init_repo, list_task, merge, rebase,
+    resolve, revert, show_help, show_log, stash, tag,
+};
 use std::env;
-use cotask::logic::{add_task, branch, checkout, diff, gc, init_repo,import,export,list_task, merge, revert, show_help, show_log,resolve, rebase,stash,tag};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -38,18 +41,16 @@ fn main() {
                 println!("Please provide task id.");
                 return;
             }
-            let id:usize = match args[2].parse() {
+            let id: usize = match args[2].parse() {
                 Ok(n) => n,
-                Err(_) =>{
+                Err(_) => {
                     println!("Invalid task ID");
                     return;
                 }
-                
             };
             add_task::mark_done(id);
-
         }
-        
+
         "log" => show_log::show_log(),
 
         "checkout" => {
@@ -99,7 +100,6 @@ fn main() {
             merge::merge_branch(&args[2]);
         }
 
-
         "branch" => {
             if args.len() < 3 {
                 println!("Provide branch name.");
@@ -125,7 +125,6 @@ fn main() {
         }
         "--help" => {
             show_help::show_help();
-            return;
         }
 
         "tag" => {
@@ -139,7 +138,6 @@ fn main() {
         "tags" => {
             tag::list_tags();
         }
-
 
         "resolve" => {
             if args.len() < 4 {
@@ -160,18 +158,17 @@ fn main() {
             resolve::resolve(id, done);
         }
         "rebase" => {
-        if args.len() < 3 {
-            println!("Provide target branch.");
-            return;
-        }
+            if args.len() < 3 {
+                println!("Provide target branch.");
+                return;
+            }
 
-        rebase::rebase_onto(&args[2]);
-    }
+            rebase::rebase_onto(&args[2]);
+        }
 
         _ => {
             println!("Unknown command.\n");
-            show_help::show_help();  
+            show_help::show_help();
         }
-
     }
 }

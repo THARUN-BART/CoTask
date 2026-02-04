@@ -1,18 +1,15 @@
-use std::fs;
-use crate::storage::{
-    head::{read_head_branch, read_branch_commit, write_branch_commit},
-    commit::{load_commit, save_commit},
-};
 use crate::models::commit_model::Commit;
+use crate::storage::{
+    commit::{load_commit, save_commit},
+    head::{read_branch_commit, read_head_branch, write_branch_commit},
+};
+use std::fs;
 
 pub fn resolve(task_id: usize, done: bool) {
-    let conflict = match fs::read_to_string(".cotask/MERGE_CONFLICT") {
-        Ok(c) => c,
-        Err(_) => {
-            println!("No conflict to resolve.");
-            return;
-        }
-    };
+    if fs::read_to_string(".cotask/MERGE_CONFLICT").is_err() {
+        println!("No merge conflict to resolve");
+        return;
+    }
 
     let branch = read_head_branch().unwrap();
     let head = read_branch_commit(&branch).unwrap();

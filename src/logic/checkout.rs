@@ -1,9 +1,9 @@
-use std::fs;
+use crate::logic::tag::read_tag_commit;
 use crate::storage::{
     commit::load_commit,
-    head::{write_head_branch, read_head_branch},
+    head::{read_head_branch, write_head_branch},
 };
-use crate::logic::tag::read_tag_commit;
+use std::fs;
 
 pub fn checkout_commit(commit_number: usize) {
     if commit_number == 0 {
@@ -28,8 +28,10 @@ pub fn checkout_ref(name: &str) {
     // 1) Branch check
     let branch_path = format!(".cotask/refs/{}", name);
     if fs::metadata(&branch_path).is_ok() {
-        if let Ok(current) = read_head_branch() {
-            if current == name {
+        if let Ok(current) = read_head_branch()
+            && current == name
+        {
+            {
                 println!("Already on branch '{}'", name);
                 return;
             }

@@ -1,8 +1,5 @@
+use crate::{models::export_model::RepoExport, storage::commit::load_commit};
 use std::{collections::HashMap, fs};
-use crate::{
-    models::export_model::RepoExport,
-    storage::commit::load_commit,
-};
 
 pub fn export_repo() {
     let mut commits = HashMap::new();
@@ -13,10 +10,10 @@ pub fn export_repo() {
     if let Ok(entries) = fs::read_dir(".cotask/commits") {
         for e in entries.flatten() {
             let name = e.file_name().into_string().unwrap();
-            if let Ok(num) = name.trim_end_matches(".json").parse::<usize>() {
-                if let Ok(commit) = load_commit(num) {
-                    commits.insert(num, commit);
-                }
+            if let Ok(num) = name.trim_end_matches(".json").parse::<usize>()
+                && let Ok(commit) = load_commit(num)
+            {
+                commits.insert(num, commit);
             }
         }
     }
@@ -43,7 +40,12 @@ pub fn export_repo() {
 
     let head = fs::read_to_string(".cotask/HEAD").unwrap();
 
-    let export = RepoExport { commits, branches, tags, head };
+    let export = RepoExport {
+        commits,
+        branches,
+        tags,
+        head,
+    };
 
     let json = serde_json::to_string_pretty(&export).unwrap();
     fs::write("cotask_backup.json", json).unwrap();

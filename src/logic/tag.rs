@@ -1,5 +1,5 @@
+use crate::storage::head::{read_branch_commit, read_head_branch};
 use std::fs;
-use crate::storage::head::{read_head_branch, read_branch_commit};
 
 pub fn create_tag(name: &str) {
     let branch = read_head_branch().unwrap();
@@ -25,7 +25,6 @@ pub fn read_tag_commit(name: &str) -> Option<usize> {
         Err(_) => None,
     }
 }
-
 
 pub fn list_tags() {
     match fs::read_dir(".cotask/tags") {

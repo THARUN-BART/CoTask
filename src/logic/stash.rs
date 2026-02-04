@@ -1,10 +1,10 @@
-use std::fs;
+use crate::models::commit_model::Commit;
 use crate::storage::{
     commit::load_commit,
-    head::{read_head_branch, read_branch_commit, write_branch_commit},
     commit::save_commit,
+    head::{read_branch_commit, read_head_branch, write_branch_commit},
 };
-use crate::models::commit_model::Commit;
+use std::fs;
 
 pub fn stash() {
     let branch = read_head_branch().unwrap();
@@ -41,17 +41,21 @@ pub fn stash_pop() {
 
     fs::remove_file(path).unwrap();
 
-    println!("Applied stash {} → new commit {}", stash_id, new_commit_number);
+    println!(
+        "Applied stash {} → new commit {}",
+        stash_id, new_commit_number
+    );
 }
 
 fn next_stash_id() -> usize {
     let mut max = 0;
     if let Ok(entries) = fs::read_dir(".cotask/stash") {
         for e in entries.flatten() {
-            if let Some(name) = e.file_name().to_str() {
-                if let Ok(n) = name.trim_end_matches(".json").parse::<usize>() {
-                    if n > max { max = n; }
-                }
+            if let Some(name) = e.file_name().to_str()
+                && let Ok(n) = name.trim_end_matches(".json").parse::<usize>()
+                && n > max
+            {
+                max = n;
             }
         }
     }
@@ -62,10 +66,11 @@ fn latest_stash_id() -> usize {
     let mut max = 0;
     if let Ok(entries) = fs::read_dir(".cotask/stash") {
         for e in entries.flatten() {
-            if let Some(name) = e.file_name().to_str() {
-                if let Ok(n) = name.trim_end_matches(".json").parse::<usize>() {
-                    if n > max { max = n; }
-                }
+            if let Some(name) = e.file_name().to_str()
+                && let Ok(n) = name.trim_end_matches(".json").parse::<usize>()
+                && n > max
+            {
+                max = n;
             }
         }
     }

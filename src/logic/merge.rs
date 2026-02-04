@@ -1,10 +1,10 @@
-use std::fs;
-use std::collections::HashMap;
-use crate::storage::{
-    head::{read_head_branch, read_branch_commit, write_branch_commit},
-    commit::{load_commit, save_commit},
-};
 use crate::models::{commit_model::Commit, task_model::Task};
+use crate::storage::{
+    commit::{load_commit, save_commit},
+    head::{read_branch_commit, read_head_branch, write_branch_commit},
+};
+use std::collections::HashMap;
+use std::fs;
 
 pub fn merge_branch(target_branch: &str) {
     // Current branch (OURS)
@@ -43,11 +43,14 @@ pub fn merge_branch(target_branch: &str) {
     let target = load_commit(theirs).unwrap();
 
     let mut task_map: HashMap<usize, Task> = HashMap::new();
+    let mut conflict_found = false;
 
+    // Insert OUR tasks
     for t in current.tasks {
         task_map.insert(t.id, t);
     }
 
+    // Merge THEIR tasks
     for t in target.tasks {
         task_map
             .entry(t.id)
@@ -56,17 +59,22 @@ pub fn merge_branch(target_branch: &str) {
                 if existing.completed != t.completed || existing.text != t.text {
                     let conflict_info = format!(
                         "TASK {}\nOURS: completed={}, text={}\nTHEIRS: completed={}, text={}\n",
-                        existing.id, existing.completed, existing.text,
-                        t.completed, t.text
+                        existing.id, existing.completed, existing.text, t.completed, t.text
                     );
                     fs::write(".cotask/MERGE_CONFLICT", conflict_info).unwrap();
 
                     println!("⚠ Conflict in task {}!", existing.id);
                     println!("Run: cotask resolve {} done|undone", existing.id);
-                    return; // stop merge safely
+
+                    conflict_found = true;
                 }
             })
             .or_insert(t);
+    }
+
+    //  Stop merge safely if conflict happened
+    if conflict_found {
+        return;
     }
 
     let merged_tasks: Vec<Task> = task_map.into_values().collect();
