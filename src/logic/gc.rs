@@ -2,8 +2,8 @@ use std::collections::HashSet;
 use std::fs;
 
 use crate::storage::{
-    head::{read_head_branch, read_branch_commit},
     commit::load_commit,
+    head::{read_branch_commit, read_head_branch},
 };
 
 fn collect_reachable(commit_number: usize, reachable: &mut HashSet<usize>) {
@@ -61,11 +61,11 @@ pub fn run_gc() {
         if let Some(name) = entry.path().file_stem()
             && let Ok(num) = name.to_string_lossy().parse::<usize>()
             && !reachable.contains(&num)
-            && fs::remove_file(entry.path()).is_ok() {
-                deleted += 1;
-            }
-
+            && fs::remove_file(entry.path()).is_ok()
+        {
+            deleted += 1;
         }
+    }
 
     println!("GC complete. Removed {} unreachable commits.", deleted);
 }

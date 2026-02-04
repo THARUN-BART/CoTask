@@ -1,5 +1,5 @@
+use crate::storage::head::{read_branch_commit, read_head_branch};
 use std::fs;
-use crate::storage::{head::{read_branch_commit, read_head_branch}};
 
 pub fn create_branch(name: &str) {
     let current_branch = match read_head_branch() {
@@ -62,7 +62,6 @@ pub fn delete_branch(name: &str) {
             println!("Repository not initialized.");
             return;
         }
-
     };
     // Prevent deleting current branch
     if name == current_branch {
@@ -70,7 +69,7 @@ pub fn delete_branch(name: &str) {
         return;
     }
 
-    let path = format!(".cotask/refs/{}",name);
+    let path = format!(".cotask/refs/{}", name);
     // Check branch exists
     if fs::metadata(&path).is_err() {
         println!("Branch '{}' does not exist.", name);
@@ -83,5 +82,5 @@ pub fn delete_branch(name: &str) {
         return;
     }
 
-    println!("Branch '{}' deleted.",name);
+    println!("Branch '{}' deleted.", name);
 }

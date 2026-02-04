@@ -1,6 +1,6 @@
 use crate::storage::{
-    head::{read_head_branch, read_branch_commit},
     commit::load_commit,
+    head::{read_branch_commit, read_head_branch},
 };
 
 pub fn list_tasks() {

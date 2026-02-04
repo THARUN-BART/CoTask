@@ -12,29 +12,22 @@ pub fn init_repo() {
     fs::create_dir(repo_path).expect("Failed to create .cotask directory");
 
     // Create commits folder
-    fs::create_dir(repo_path.join("commits"))
-        .expect("Failed to create commits directory");
+    fs::create_dir(repo_path.join("commits")).expect("Failed to create commits directory");
 
     // Create refs folder
-    fs::create_dir(repo_path.join("refs"))
-        .expect("Failed to create refs directory");
+    fs::create_dir(repo_path.join("refs")).expect("Failed to create refs directory");
 
     // Create tags folder
-    fs::create_dir(repo_path.join("tags"))
-        .expect("Failed to create tags directory");
+    fs::create_dir(repo_path.join("tags")).expect("Failed to create tags directory");
 
     // Create stash folder
-    fs::create_dir(repo_path.join("stash"))
-    .expect("Failed to create stash directory");
-
+    fs::create_dir(repo_path.join("stash")).expect("Failed to create stash directory");
 
     // HEAD now stores branch name
-    fs::write(repo_path.join("HEAD"), "main")
-        .expect("Failed to create HEAD");
+    fs::write(repo_path.join("HEAD"), "main").expect("Failed to create HEAD");
 
     // Create main branch pointing to commit 0
-    fs::write(repo_path.join("refs/main"), "0")
-        .expect("Failed to create main branch");
+    fs::write(repo_path.join("refs/main"), "0").expect("Failed to create main branch");
 
     println!("Initialized empty cotask repository with branch 'main'.");
 }

@@ -1,10 +1,10 @@
-use std::fs;
-use std::collections::HashMap;
-use crate::storage::{
-    head::{read_head_branch, read_branch_commit, write_branch_commit},
-    commit::{load_commit, save_commit},
-};
 use crate::models::{commit_model::Commit, task_model::Task};
+use crate::storage::{
+    commit::{load_commit, save_commit},
+    head::{read_branch_commit, read_head_branch, write_branch_commit},
+};
+use std::collections::HashMap;
+use std::fs;
 
 pub fn merge_branch(target_branch: &str) {
     // Current branch (OURS)
@@ -59,8 +59,7 @@ pub fn merge_branch(target_branch: &str) {
                 if existing.completed != t.completed || existing.text != t.text {
                     let conflict_info = format!(
                         "TASK {}\nOURS: completed={}, text={}\nTHEIRS: completed={}, text={}\n",
-                        existing.id, existing.completed, existing.text,
-                        t.completed, t.text
+                        existing.id, existing.completed, existing.text, t.completed, t.text
                     );
                     fs::write(".cotask/MERGE_CONFLICT", conflict_info).unwrap();
 

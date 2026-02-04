@@ -1,2 +1,2 @@
-pub mod head;
 pub mod commit;
+pub mod head;
